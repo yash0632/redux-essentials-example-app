@@ -1,8 +1,10 @@
 import { useAppDispatch, useAppSelector } from "../../app/store"
-import { selectAllUsers } from "../users/usersSlice"
+import { selectAllUsers, selectUsersStatus } from "../users/usersSlice"
 import { useNavigate } from "react-router-dom"
 import { userLoggedIn } from "@/features/auth/authSlice"
 import { ECDH } from "crypto"
+import { fetchUsers } from "../users/usersSlice"
+import { useEffect } from "react"
 
 interface LoginPageFormFields extends HTMLFormControlsCollection{
     username:HTMLSelectElement
@@ -17,6 +19,13 @@ export default function LoginPage(){
     const dispatch = useAppDispatch()
 
     const users = useAppSelector(selectAllUsers);
+    const userStatus = useAppSelector(selectUsersStatus)
+
+    useEffect(()=>{
+        if(userStatus === 'idle'){
+            dispatch(fetchUsers())
+        }
+    },[users,dispatch])
     const navigate = useNavigate();
 
     const handleSubmit = (e:React.FormEvent<LoginPageFormElement>)=>{

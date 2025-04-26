@@ -1,10 +1,12 @@
+import { useState } from "react"
+
 interface AddPostFormFields extends HTMLFormControlsCollection{
     postTitle:HTMLInputElement
     postContent:HTMLTextAreaElement
     postAuthor:HTMLSelectElement
 }
 import { useAppDispatch, useAppSelector } from "@/app/store"
-import { postAdded } from "./postsSlice"
+import { addNewPost, postAdded } from "./postsSlice"
 import { nanoid } from "@reduxjs/toolkit"
 import { selectAllUsers, selectCurrentUser } from "../users/usersSlice"
 interface AddPostFormElement extends HTMLFormElement{
@@ -14,12 +16,13 @@ interface AddPostFormElement extends HTMLFormElement{
 
 
 export default function AddPostForm(){
+    const [addRequestStatus,setAddRequestStatus] = useState<'idle'|'pending'>('idle')
     const dispatch = useAppDispatch();
 
     const user = useAppSelector(selectCurrentUser);
 
 
-    const handleSubmit = (e:React.FormEvent<AddPostFormElement>)=>{
+    const handleSubmit =async (e:React.FormEvent<AddPostFormElement>)=>{
         e.preventDefault();
 
         const {elements} = e.currentTarget;
@@ -28,11 +31,20 @@ export default function AddPostForm(){
         const content = elements.postContent.value;
         
         const userId = user!.id;
+        const form = e.currentTarget
 
-        console.log('Values:',{title,content})
+        try{
+            setAddRequestStatus('pending')
+            await dispatch(addNewPost({title,content,user:userId})).unwrap()
 
-        dispatch(postAdded(title,content,userId))
-        e.currentTarget.reset();
+            form.reset();
+        }
+        catch(err){
+            console.error('Failed to save the post',err)
+        }
+        finally{
+            setAddRequestStatus('idle')
+        }
     }
     
 
