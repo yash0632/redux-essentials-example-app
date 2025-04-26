@@ -1,12 +1,17 @@
-import {useParams} from "react-router-dom"
+import {useParams,useNavigate} from "react-router-dom"
 import { RootState, useAppSelector } from "@/app/store";
 import { useSelector } from "react-redux";
+import {selectPostById} from "./postsSlice"
+import { selectCurrentUsername } from "../auth/authSlice";
+import ReactionButtons from "./ReactionButtons";
 
 export default function SinglePostPage(){
+    const navigate = useNavigate();
     const params = useParams();
     const postId = params.postId;
 
-    const post = useAppSelector(state => state.posts.find(post => post.id === postId));
+    const post = useAppSelector(state => selectPostById(state,postId!));
+    const currentUsername = useAppSelector(selectCurrentUsername)!
 
     if(!post){
         return(
@@ -16,11 +21,20 @@ export default function SinglePostPage(){
         )
     }
 
+    const canEdit = currentUsername === post.user;
     return(
         <section>
             <article className="post">
                 <h2>{post.title}</h2>
                 <p className="post-content">{post.content}</p>
+                <ReactionButtons post={post}/>
+                {canEdit && (
+                    <button onClick={()=>{
+                        navigate(`/editPost/${post.id}`,{replace:true})
+                    }}>Edit Post</button>
+                )}
+
+                
             </article>
         </section>
     )
