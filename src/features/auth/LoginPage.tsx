@@ -5,6 +5,7 @@ import { userLoggedIn } from "@/features/auth/authSlice"
 import { ECDH } from "crypto"
 import { fetchUsers } from "../users/usersSlice"
 import { useEffect } from "react"
+import {login} from './authSlice'
 
 interface LoginPageFormFields extends HTMLFormControlsCollection{
     username:HTMLSelectElement
@@ -28,13 +29,13 @@ export default function LoginPage(){
     },[users,dispatch])
     const navigate = useNavigate();
 
-    const handleSubmit = (e:React.FormEvent<LoginPageFormElement>)=>{
+    const handleSubmit =async (e:React.FormEvent<LoginPageFormElement>)=>{
         e.preventDefault()
 
         const username = e.currentTarget.elements.username.value
         //console.log(e.currentTarget.elements)
 
-        dispatch(userLoggedIn(username))
+        await dispatch(login(username))
         navigate('/posts',{replace:true})
     }
 

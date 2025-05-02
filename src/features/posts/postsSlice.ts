@@ -1,4 +1,4 @@
-import { PayloadAction, createSlice, nanoid } from "@reduxjs/toolkit"
+import { PayloadAction, createSlice, nanoid,createSelector } from "@reduxjs/toolkit"
 import { RootState } from "@/app/store"
 import {sub} from 'date-fns'
 import { userLoggedOut } from "../auth/authSlice"
@@ -145,6 +145,14 @@ export const selectPostById = (state:RootState,postId:string) => state.posts.pos
 export const selectPostsStatus = (state:RootState) => state.posts.status;
 
 export const selectPostsError = (state:RootState) => state.posts.error;
+
+export const selectPostsByUser = createSelector(
+    [
+        selectAllPosts,
+        (state:RootState,userId:string)=>userId
+    ],
+    (posts,userId) => posts.filter(post => post.user === userId)
+);
 
 //store -> configureStore object where current redux application state lives -> has both dispatch function and getState function
 

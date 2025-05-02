@@ -8,6 +8,10 @@ import EditPostForm from './features/posts/EditPostForm'
 import LoginPage from '@/features/auth/LoginPage'
 import { selectCurrentUsername } from './features/auth/authSlice'
 import { useAppSelector } from './app/store'
+import { UsersList } from './features/users/UsersList'
+import UserPage from './features/users/UserPage'
+import NotificationList from '@/features/notifications/NotificationList'
+
 
 const ProtectedRoute = ({children}:{children:React.ReactNode})=>{
   const username = useAppSelector(selectCurrentUsername)
@@ -35,6 +39,9 @@ function App() {
                   <Route path="/posts" element={<><AddPostForm/><PostsLists/></>}/>
                   <Route path="/posts/:postId" element={<SinglePostPage/>}/>
                   <Route path="/editPost/:postId" element={<EditPostForm/>}/>
+                  <Route path="/users" element={<UsersList/>}/>
+                  <Route path="/users/:userId" element={<UserPage/>}/>
+                  <Route path="/notifications" element={<NotificationList/>}/>
                 </Routes>
               </ProtectedRoute>
               

@@ -5,6 +5,7 @@ import postsReducer from "../features/posts/postsSlice";
 import usersReducer from "@/features/users/usersSlice";
 import authReducer from "@/features/auth/authSlice"
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import notificationReducer from "@/features/notifications/notificationSlice";
 
 
 
@@ -13,7 +14,8 @@ const store = configureStore({
     reducer:{
         posts: postsReducer,
         users: usersReducer,
-        auth: authReducer
+        auth: authReducer,
+        notifications:notificationReducer
     }
 })
 
