@@ -4,6 +4,7 @@ import {sub} from 'date-fns'
 import { userLoggedOut } from "../auth/authSlice"
 import {client} from "@/api/client"
 import { createAppAsyncThunk } from "@/app/withTypes"
+import { AppStartListening, startAppListening } from "@/app/listenerMiddleware"
 
 
 
@@ -16,7 +17,7 @@ export interface Post{
     reactions: Reactions
 }
 
-type NewPost = Pick<Post, 'title' | 'content' | 'user'>
+export type NewPost = Pick<Post, 'title' | 'content' | 'user'>
 
 export interface Reactions {
     thumbsUp: number,
@@ -153,6 +154,26 @@ export const selectPostsByUser = createSelector(
     ],
     (posts,userId) => posts.filter(post => post.user === userId)
 );
+
+export const addPostsListeners = (startAppListening:AppStartListening)=>{
+    startAppListening({
+        actionCreator:addNewPost.fulfilled,
+        effect: async(action,listenerApi)=>{
+            const {toast} = await import('react-tiny-toast');
+
+            const toastId = toast.show('New post added!', {
+                variant: 'success',
+                position: 'bottom-right',
+                pause: true
+              })
+        
+              await listenerApi.delay(5000)
+              toast.remove(toastId)
+            
+        }
+    })
+}
+
 
 //store -> configureStore object where current redux application state lives -> has both dispatch function and getState function
 

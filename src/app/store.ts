@@ -7,7 +7,8 @@ import authReducer from "@/features/auth/authSlice"
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import notificationReducer from "@/features/notifications/notificationSlice";
 
-
+import { apiSlice } from "@/features/api/apiSlice";
+import { listenerMiddleware } from "./listenerMiddleware";
 
 
 const store = configureStore({
@@ -15,8 +16,13 @@ const store = configureStore({
         posts: postsReducer,
         users: usersReducer,
         auth: authReducer,
-        notifications:notificationReducer
-    }
+        notifications:notificationReducer,
+        [apiSlice.reducerPath]:apiSlice.reducer
+    },
+    middleware:(getDefaultMiddleware) => 
+        getDefaultMiddleware()
+            .prepend(listenerMiddleware.middleware)
+            .concat(apiSlice.middleware),
 })
 
 // const exampleThunkFunction = (

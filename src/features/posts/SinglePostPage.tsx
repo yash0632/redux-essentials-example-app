@@ -4,25 +4,56 @@ import { useSelector } from "react-redux";
 import {selectPostById} from "./postsSlice"
 import { selectCurrentUsername } from "../auth/authSlice";
 import ReactionButtons from "./ReactionButtons";
+import { useGetPostQuery } from "../api/apiSlice";
+import type {Post} from "./postsSlice"
+import { Spinner } from "@/components/Spinner";
 
 export default function SinglePostPage(){
-    const navigate = useNavigate();
+    
     const params = useParams();
-    const postId = params.postId;
+    const postId = params.postId as string;
 
-    const post = useAppSelector(state => selectPostById(state,postId!));
-    const currentUsername = useAppSelector(selectCurrentUsername)!
+    const {
+        data:post,
+        isFetching,
+        isSuccess,
+        isError,
+        error
+    } = useGetPostQuery(postId!);
 
-    if(!post){
-        return(
-            <section>
-                <h2>Post Not Found!</h2>
-            </section>
-        )
+    let content :React.ReactNode;
+
+
+    if(isFetching){
+        content = <Spinner text={"Loading..."}></Spinner>
+    }
+    else if(isSuccess){
+        content = <PostView post={post}></PostView>
+    }
+    else if(isError){
+        content = <div>{error.toString()}</div>
     }
 
-    const canEdit = currentUsername === post.user;
+    
     return(
+        <>
+            {content}
+            
+        </>
+    )
+    
+
+    
+    
+
+
+}
+
+function PostView({post}:{post:Post}){
+    const navigate = useNavigate();
+    const currentUsername = useAppSelector(selectCurrentUsername)
+    const canEdit = currentUsername === post.user;
+    return (
         <section>
             <article className="post">
                 <h2>{post.title}</h2>
@@ -38,6 +69,4 @@ export default function SinglePostPage(){
             </article>
         </section>
     )
-
-
 }

@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from "@/app/store"
 import { addNewPost, postAdded } from "./postsSlice"
 import { nanoid } from "@reduxjs/toolkit"
 import { selectAllUsers, selectCurrentUser } from "../users/usersSlice"
+import { useAddNewPostMutation } from "../api/apiSlice"
 interface AddPostFormElement extends HTMLFormElement{
     readonly elements:AddPostFormFields
 }
@@ -16,8 +17,9 @@ interface AddPostFormElement extends HTMLFormElement{
 
 
 export default function AddPostForm(){
-    const [addRequestStatus,setAddRequestStatus] = useState<'idle'|'pending'>('idle')
-    const dispatch = useAppDispatch();
+   
+    
+    const [addNewPost,{isLoading}] = useAddNewPostMutation();
 
     const user = useAppSelector(selectCurrentUser);
 
@@ -30,21 +32,18 @@ export default function AddPostForm(){
         const title = elements.postTitle.value;
         const content = elements.postContent.value;
         
-        const userId = user!.id;
         const form = e.currentTarget
+        const userId = user!.id;
 
         try{
-            setAddRequestStatus('pending')
-            await dispatch(addNewPost({title,content,user:userId})).unwrap()
+            await addNewPost({title,content,user:userId}).unwrap()
 
             form.reset();
         }
         catch(err){
             console.error('Failed to save the post',err)
         }
-        finally{
-            setAddRequestStatus('idle')
-        }
+        
     }
     
 
@@ -62,7 +61,7 @@ export default function AddPostForm(){
                     defaultValue=""
                     required
                 />
-                <button type="submit">Save Post</button>
+                <button disabled={isLoading} type="submit">Save Post</button>
             </form>
         </section>
     )

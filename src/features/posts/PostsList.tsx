@@ -1,4 +1,5 @@
 import { useAppSelector,useAppDispatch } from "@/app/store";
+import classNames from "classnames";
 
 import { Link } from "react-router-dom";
 import { selectAllPosts, selectPostsStatus,fetchPosts, selectPostsError } from "./postsSlice";
@@ -6,8 +7,11 @@ import PostAuthor from "./PostAuthor";
 import { TimeAgo } from "@/components/TimeAgo";
 import {Spinner} from "@/components/Spinner"
 import ReactionButtons from "./ReactionButtons";
-import React,{useEffect} from 'react'
-import {Post} from "./postsSlice"
+import React,{useEffect, useMemo} from 'react'
+import type {Post} from "./postsSlice"
+
+import { useGetPostsQuery } from "../api/apiSlice";
+
 
 interface PostExcerptProps{
     post: Post
@@ -37,33 +41,38 @@ function PostExcerpt({post}:PostExcerptProps){
 
 
 export default function PostsList(){
-    const posts = useAppSelector(selectAllPosts);
-    const dispatch = useAppDispatch();
-    const postStatus = useAppSelector(selectPostsStatus)
-    const postsError = useAppSelector(selectPostsError)
+    const {
+        data:posts = [],
+        isLoading,
+        isSuccess,
+        isFetching,
+        isError,
+        error
+    } = useGetPostsQuery()
 
+    const sortedPosts = useMemo(()=>{
+        const sortedPosts = posts.slice()
 
-    useEffect(()=>{
-        if(postStatus === 'idle'){
-            dispatch(fetchPosts())
-        }
-    },[postStatus,dispatch])
+        sortedPosts.sort((a,b) => b.date.localeCompare(a.date))
+        return sortedPosts
+    },[posts])
+
 
     let content: React.ReactNode;
-    if(postStatus === 'pending'){
+    
+    if(isLoading){
         content = <Spinner text="Loading..."/>
-    } else if(postStatus === 'succeeded'){
-        const orderedPosts = posts.slice().sort((a,b)=>b.date.localeCompare(a.date))
+    } else if (isSuccess) {
+        const renderedPosts = sortedPosts.map(post => <PostExcerpt key={post.id} post={post}/>)
 
-        content = orderedPosts.map(post => (
-            <PostExcerpt key={post.id} post={post}/>
-        ))
+        const containerClassname = classNames('posts-container',{
+            disabled:isFetching
+        })
 
-    } else if (postStatus === 'failed'){
-        content = <div>{postsError}</div>
+        content = <div className={containerClassname}>{renderedPosts}</div>
+    } else if(isError){
+        content = <div>{error.toString()}</div>
     }
-
-    const orderedPosts = posts.slice().sort((a,b)=>b.date.localeCompare(a.date))
 
     return(
         <section className="posts-list">
